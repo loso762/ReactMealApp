@@ -1,45 +1,54 @@
-import React, { useContext } from "react";
-import { CartContext } from "../../store/cart-context";
+import { useContext } from "react";
+
 import Modal from "../UI/Modal";
 import CartItem from "./CartItem";
 import classes from "./Cart.module.css";
+import CartContext from "../../store/cart-context";
 
 const Cart = (props) => {
-  const ctx = useContext(CartContext);
+  const cartCtx = useContext(CartContext);
 
-  const totalAmount = `$ ${ctx.totalAmount.toFixed(2)}`;
-  const hasItems = ctx.items.length > 0;
+  const totalAmount = `$${cartCtx.totalAmount.toFixed(2)}`;
+  const hasItems = cartCtx.items.length > 0;
 
-  const cartItemRemoveHandler = (id) => {};
+  const cartItemRemoveHandler = (id) => {
+    cartCtx.removeItem(id);
+  };
 
-  const cartItemAddHandler = (item) => {};
+  const cartItemAddHandler = (item) => {
+    cartCtx.addItem({ ...item, amount: 1 });
+  };
+
+  const cartItems = (
+    <ul className={classes["cart-items"]}>
+      {cartCtx.items.map((item) => (
+        <CartItem
+          key={item.id}
+          name={item.name}
+          amount={item.amount}
+          price={item.price}
+          onRemove={cartItemRemoveHandler.bind(null, item.id)}
+          onAdd={cartItemAddHandler.bind(null, item)}
+        />
+      ))}
+    </ul>
+  );
+
   return (
-    <Modal onCloseCart={props.onCloseCart}>
-      <ul className={classes["cart-items"]}>
-        {ctx.items.map((item) => {
-          return (
-            <CartItem
-              key={item.id}
-              name={item.name}
-              amount={item.amount}
-              price={item.price}
-              onRemove={cartItemRemoveHandler.bind(null, item.id)}
-              onAdd={cartItemAddHandler.bind(null, item)}
-            />
-          );
-        })}
-      </ul>
-      <div>
-        <span>총 가격은</span>
-        <span> {totalAmount} 입니다.</span>
+    <Modal onClose={props.onClose}>
+      {cartItems}
+      <div className={classes.total}>
+        <span>Total Amount</span>
+        <span>{totalAmount}</span>
       </div>
       <div className={classes.actions}>
-        <button className={classes["button--alt"]} onClick={props.onCloseCart}>
-          닫기
+        <button className={classes["button--alt"]} onClick={props.onClose}>
+          Close
         </button>
-        {hasItems && <button className={classes.button}>주문</button>}
+        {hasItems && <button className={classes.button}>Order</button>}
       </div>
     </Modal>
   );
 };
+
 export default Cart;
